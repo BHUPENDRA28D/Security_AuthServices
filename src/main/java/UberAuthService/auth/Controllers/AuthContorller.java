@@ -9,10 +9,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -26,10 +23,16 @@ public class AuthContorller {
         this.authService = authService;
     }
 
-    @PostMapping("/signup/passenger")
-    public ResponseEntity<PassengerResponseDTO> signUp(@RequestBody PassengerSignUpDTO passengerSignUpRequestDTO){
+  @PostMapping("/signup/passenger")
+        public ResponseEntity<PassengerResponseDTO> signUp(@RequestBody PassengerSignUpDTO passengerSignUpRequestDTO){
 
-        PassengerResponseDTO response  = authService.signUpPassenger(passengerSignUpRequestDTO);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+            PassengerResponseDTO response  = authService.signUpPassenger(passengerSignUpRequestDTO);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/signin")
+    public ResponseEntity<?> signIn(){
+
+        return new ResponseEntity<>("SIGNIN PROPERTIY", HttpStatus.OK);
     }
 }
