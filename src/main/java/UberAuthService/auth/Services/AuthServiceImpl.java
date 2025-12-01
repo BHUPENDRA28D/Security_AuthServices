@@ -43,17 +43,6 @@ public class AuthServiceImpl implements AuthService{
 
     }
 
-//    @GetMapping("/signin")
-//    public PassengerResponseDTO s(PassengerSignUpDTO passengerSignUpDTO) {
-//
-//        //convert DTO ---> ENTITY
-//        Passenger passenger=  adaptor.convertDTOtoEntity(passengerSignUpDTO);
-//        //save to db
-//        Passenger saved = passengerRepository.save(passenger);
-//
-//        // returing response!
-//        return mapper.toDTO(saved);
-//
-//    }
+
 
 }
