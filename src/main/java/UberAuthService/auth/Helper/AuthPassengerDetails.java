@@ -1,4 +1,4 @@
-package UberAuthService.auth.Security;
+package UberAuthService.auth.Helper;
 
 import UberAuthService.auth.Model.Passenger;
 import org.springframework.security.core.GrantedAuthority;
@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 // why we need this class?
 // Because spring security works on UserDetails polymorphic type for auth.
+//blueprint to hodling user info.
 public class AuthPassengerDetails extends Passenger implements UserDetails {
 
     private String username; //email /name/id/phoneNumber
@@ -25,7 +26,12 @@ public class AuthPassengerDetails extends Passenger implements UserDetails {
 
     @Override
     public String getUsername() {
-        return "";
+        return this.username;
+    }
+
+    @Override
+    public String getPassword() {
+        return this.password;
     }
 
     @Override
