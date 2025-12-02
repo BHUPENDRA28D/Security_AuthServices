@@ -25,12 +25,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
        Optional<Passenger> passenger = passengerRepository.findPassengerByEmail(email); //email is uniqe identifier.
-        if(passenger.isPresent()) return new AuthPassengerDetails(passenger.get());
-
+        if(passenger.isPresent()) {
+            return new AuthPassengerDetails(passenger.get());
+        }
         else{
-            throw new UsernameNotFoundException("Cannot find the passenger by the given Email !")
+            throw new UsernameNotFoundException("Cannot find the passenger by the given Email !");
         }
 
-        return null;
+
     }
 }
