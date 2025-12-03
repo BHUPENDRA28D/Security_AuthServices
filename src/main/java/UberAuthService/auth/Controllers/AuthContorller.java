@@ -6,6 +6,8 @@ import UberAuthService.auth.DTO.PassengerResponseDTO;
 import UberAuthService.auth.DTO.PassengerSignUpDTO;
 import UberAuthService.auth.Services.AuthService;
 import UberAuthService.auth.Services.JWTService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -73,7 +75,7 @@ public class AuthContorller {
                 String jwtToken = jwtService.createToken(authRequestDTO.getEmail());
                 ResponseCookie cookie = ResponseCookie.from("JwtToken", jwtToken)
                         .httpOnly(true)
-                        .secure(true)
+                        .secure(false)
                         .path("/")
                         .maxAge(cookiexpiry)
                         .build();
@@ -92,5 +94,25 @@ public class AuthContorller {
 
 
        }
+
+       /*
+       * VALIDATE API
+       * */
+     @GetMapping("/validate")
+    public ResponseEntity<?> validateToken(HttpServletResponse response, HttpServletRequest request){
+
+         System.out.println("Inside Validate Controller");
+
+         // accsess our token in our reques!
+
+       for (Cookie cookie: request.getCookies()){
+           System.out.println(cookie.getName()+ "  "+cookie.getValue());
+       }
+
+
+         return new ResponseEntity<>("Scussess",HttpStatus.OK);
+     }
+
+
     }
 

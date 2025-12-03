@@ -1,6 +1,8 @@
 package UberAuthService.auth.Config;
 
+import UberAuthService.auth.Filter.JWTAuthFilter;
 import UberAuthService.auth.Services.UserDetailsServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -20,6 +23,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class AppSecurityConfig implements WebMvcConfigurer  {
 
+
+
+    @Autowired
+    private JWTAuthFilter jwtAuthFilter;
     @Bean
     public UserDetailsService userDetailsService() {
         return new UserDetailsServiceImpl();
@@ -68,16 +75,18 @@ public class AppSecurityConfig implements WebMvcConfigurer  {
     public SecurityFilterChain filteringCriteria(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
+                 .cors(cors -> cors.disable()) // ❌ REMOVE THIS
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/v1/auth/signup/**").permitAll()
                                 .requestMatchers("/api/v1/auth/signin/**").permitAll()
-                                .anyRequest().authenticated()
-
-
-                ).authenticationProvider(authenticationProvider())
+                                .requestMatchers("/api/v1/auth/validate").authenticated() // ✅ Protected
+                                .anyRequest().authenticated() // ✅ Catch-all
+                )
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
-
     }
+
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
