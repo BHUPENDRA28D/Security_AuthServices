@@ -13,11 +13,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 
 @Configuration
-public class AppSecurityConfig implements WebMvcConfigurer {
+public class AppSecurityConfig implements WebMvcConfigurer  {
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -70,8 +71,19 @@ public class AppSecurityConfig implements WebMvcConfigurer {
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/v1/auth/signup/**").permitAll()
                                 .requestMatchers("/api/v1/auth/signin/**").permitAll()
+                                .anyRequest().authenticated()
+
 
                 ).authenticationProvider(authenticationProvider())
                 .build();
+
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowCredentials(true)
+                .allowedOriginPatterns("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
     }
 }

@@ -45,6 +45,10 @@ public class JWTService  implements CommandLineRunner {
                 .compact();
     }
 
+    public String createToken(String email) {
+        return createToken(new HashMap<>(), email);
+    }
+
     public Claims extractAllPayloads(String token) {
         return Jwts
                 .parser()
@@ -83,7 +87,7 @@ public class JWTService  implements CommandLineRunner {
 
     }
 
-    private Boolean validateToken(String token,String email){
+    public Boolean validateToken(String token, String email){
         final  String userEmailFetchFromToken = extractEmail(token);
         return(userEmailFetchFromToken.equals(email))&& !isTokenExpired(token);
     }

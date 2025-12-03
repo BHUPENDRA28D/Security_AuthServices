@@ -1,20 +1,31 @@
 package UberAuthService.auth.Controllers;
 
 import UberAuthService.auth.DTO.AuthRequestDTO;
+import UberAuthService.auth.DTO.AuthResponseDto;
 import UberAuthService.auth.DTO.PassengerResponseDTO;
 import UberAuthService.auth.DTO.PassengerSignUpDTO;
 import UberAuthService.auth.Services.AuthService;
+import UberAuthService.auth.Services.JWTService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 @RestController
@@ -22,11 +33,17 @@ import org.springframework.web.client.RestTemplate;
 public class AuthContorller {
 
 
+    @Value("${cookie.expiry}")
+    private  int cookiexpiry;
+
     private AuthService authService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthContorller(AuthenticationManager authenticationManager, AuthService authService) {
+    private final JWTService jwtService;
+
+    public AuthContorller(AuthenticationManager authenticationManager, JWTService jwtService, AuthService authService) {
         this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
         this.authService = authService;
     }
 
@@ -38,55 +55,42 @@ public class AuthContorller {
     }
 
 
-/*
     @PostMapping("/signin/passenger")
-    public ResponseEntity<?> signIn(@RequestBody AuthRequestDTO authRequestDTO){
-        System.out.println("Request received " +authRequestDTO.getEmail() + " " + authRequestDTO.getPassword());
-
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequestDTO.getEmail(),authRequestDTO.getPassword()));
-        if(authentication.isAuthenticated()){
-            return new ResponseEntity<>("Successfull auth",HttpStatus.OK);
-        }
-        return new ResponseEntity<>("Auth not Successfull PROPERTIY "+100, HttpStatus.OK);
-    }
-*/
-
-    @PostMapping("/signin/passenger")
-    public ResponseEntity<?> signIn(@RequestBody AuthRequestDTO authRequestDTO) {
-        System.out.println("\n\nreq received\n\n");
+    public ResponseEntity<?> signIn(@RequestBody AuthRequestDTO authRequestDTO, HttpServletResponse response) {
+        System.out.println("Request received " + authRequestDTO.getEmail() + " " + authRequestDTO.getPassword());
 
         try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            authRequestDTO.getEmail(),
-                            authRequestDTO.getPassword()
-                    )
-            );
-
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequestDTO.getEmail(), authRequestDTO.getPassword()));
             if (authentication.isAuthenticated()) {
-                return new ResponseEntity<>("Successful auth", HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("Auth failed (not authenticated)", HttpStatus.UNAUTHORIZED);
-            }
+/*
+            //Generate JWT token to send it to client.
+            Map<String,Object> payLoad = new HashMap<>();
+            payLoad.put("email",authRequestDTO.getEmail());
+           // String jwtToken = jwtService.createToken(payLoad, authentication.getPrincipal().toString());
 
-        } catch (Exception ex) { // AuthenticationException or its subclasses
-            ex.printStackTrace(); // prints full stack trace in console/logs
-            System.out.println("Auth error: " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
-            return new ResponseEntity<>("Auth error: " + ex.getMessage(), HttpStatus.UNAUTHORIZED);
+
+         */
+                String jwtToken = jwtService.createToken(authRequestDTO.getEmail());
+                ResponseCookie cookie = ResponseCookie.from("JwtToken", jwtToken)
+                        .httpOnly(true)
+                        .secure(true)
+                        .path("/")
+                        .maxAge(cookiexpiry)
+                        .build();
+
+//            response.setHeader("custome header","12345");
+                response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+                return new ResponseEntity<>(AuthResponseDto.builder().success(true).build(), HttpStatus.OK);
+            }
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(AuthResponseDto.builder().success(false).build());
         }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(AuthResponseDto.builder().success(false).build());
+
+
+
+       }
     }
 
-
-/*
-    @PostMapping("/fetch-comments")
-    public ResponseEntity<?> fetchComments() {
-        RestTemplate restTemplate = new RestTemplate();
-        String url = "https://jsonplaceholder.typicode.com/comments";
-
-        String response = restTemplate.getForObject(url, String.class);
-
-        return ResponseEntity.ok(response);
-    }*/
-
-
-}
