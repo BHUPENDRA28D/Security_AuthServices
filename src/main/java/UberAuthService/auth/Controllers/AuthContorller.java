@@ -4,8 +4,12 @@ import UberAuthService.auth.DTO.AuthRequestDTO;
 import UberAuthService.auth.DTO.AuthResponseDto;
 import UberAuthService.auth.DTO.PassengerResponseDTO;
 import UberAuthService.auth.DTO.PassengerSignUpDTO;
+import UberAuthService.auth.Model.Passenger;
+import UberAuthService.auth.Model.RefreshToken;
+import UberAuthService.auth.Repositories.PassengerRepository;
 import UberAuthService.auth.Services.AuthService;
 import UberAuthService.auth.Services.JWTService;
+import UberAuthService.auth.Services.RefreshTokenService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,14 +42,20 @@ public class AuthContorller {
     @Value("${cookie.expiry}")
     private  int cookiexpiry;
 
+    @Autowired
+    PassengerRepository passengerRepository;
+
     private AuthService authService;
+    private RefreshTokenService refreshTokenService;
     private final AuthenticationManager authenticationManager;
 
     private final JWTService jwtService;
 
-    public AuthContorller(AuthenticationManager authenticationManager, JWTService jwtService, AuthService authService) {
+
+    public AuthContorller(AuthenticationManager authenticationManager, JWTService jwtService, RefreshTokenService refreshTokenService, AuthService authService) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
         this.authService = authService;
     }
 
@@ -82,7 +92,38 @@ public class AuthContorller {
 
 //            response.setHeader("custome header","12345");
                 response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-                return new ResponseEntity<>(AuthResponseDto.builder().success(true).build(), HttpStatus.OK);
+
+
+
+
+
+                // ----------------------------------------
+                // 2️⃣ Generate REFRESH token
+                // ----------------------------------------
+                // 2️⃣ Fetch passenger from DB (to get ID for refresh token)
+                Passenger passenger = passengerRepository
+                        .findPassengerByEmail(authRequestDTO.getEmail())
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+                RefreshToken refreshToken = refreshTokenService.createRefreshToken(passenger.getId());
+
+                ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken.getToken())
+                        .httpOnly(true)
+                        .secure(false)
+                        .path("/")
+                        .maxAge(7 * 24 * 3600) // 7 days
+                        .build();
+
+                response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+
+                System.out.println("\n\n\n\nBoth JWT Access Token and Refresh Token created\n\n\n\n");
+                 // 4️⃣ Respond success
+                return ResponseEntity.ok(
+                        AuthResponseDto.builder().success(true).build());
+
+
+
             }
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

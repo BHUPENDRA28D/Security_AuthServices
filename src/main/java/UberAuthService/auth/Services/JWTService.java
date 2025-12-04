@@ -25,6 +25,9 @@ public class JWTService  implements CommandLineRunner {
     @Value("${jwt.expiry}")
     private int expiry;
 
+    @Value("${jwt.refresh.expiry}")
+    private int refreshExpiry; // e.g. 7 days
+
     @Value("${jwt.secret}")
     private String SECRET;
 
@@ -47,6 +50,18 @@ public class JWTService  implements CommandLineRunner {
 
     public String createToken(String email) {
         return createToken(new HashMap<>(), email);
+    }
+
+
+    // ------------------- REFRESH TOKEN --------------------
+
+    public String createRefreshToken(){
+        return Jwts.builder()
+                .subject("refresh-token")
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis()+refreshExpiry*1000L))
+                .signWith(getSignKey())
+                .compact();
     }
 
     public Claims extractAllPayloads(String token) {
