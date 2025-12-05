@@ -79,6 +79,9 @@ public class AppSecurityConfig implements WebMvcConfigurer  {
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/v1/auth/signup/**").permitAll()
                                 .requestMatchers("/api/v1/auth/signin/**").permitAll()
+                                .requestMatchers("/api/v1/auth/logout").permitAll()
+
+                                .requestMatchers("/api/v1/auth/refresh/**").permitAll()
                                 .requestMatchers("/api/v1/auth/validate").authenticated() // ✅ Protected
                                 .anyRequest().authenticated() // ✅ Catch-all
                 )

@@ -32,6 +32,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 @RestController
@@ -155,5 +156,122 @@ public class AuthContorller {
      }
 
 
+
+
+
+
+    /*
+    * Refresh API
+     */
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(HttpServletRequest request,
+                                      HttpServletResponse response){
+
+     //  1. Extract refresh token from cookies
+        String refreshValue = null;
+        Cookie [] cookies = request.getCookies();
+
+        if(cookies !=null){
+            for(Cookie c: cookies){
+                if("refreshToken".equals(c.getName())){
+                    refreshValue =c.getValue();
+                    break;
+                }
+            }
+        }
+
+        if(refreshValue == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Refresh Token missing");
+        }
+
+//     2. Validate refresh token (not expired & present in DB
+
+        Optional<RefreshToken> optional = refreshTokenService.validateRefreshToken(refreshValue);
+        if(optional.isEmpty()){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid or expired refresh token. Please login again.");
+        }
+
+        RefreshToken stored = optional.get();
+
+        // 3. Fetch user email from DB using userId
+        Passenger passenger = passengerRepository.findById(stored.getUserId())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+
+
+        // 4. Create new ACCESS token
+        String newAccessToken = jwtService.createToken(passenger.getEmail());
+
+        ResponseCookie accessCookie = ResponseCookie.from("JwtToken", newAccessToken)
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(cookiexpiry)
+                .build();
+
+        response.setHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        // 5. (Optional but recommended) Rotate refresh token → new token, delete old
+        RefreshToken newRefresh = refreshTokenService.createRefreshToken(stored.getUserId());
+        refreshTokenService.deleteByToken(refreshValue);
+
+        ResponseCookie newRefreshCookie = ResponseCookie.from("refreshToken", newRefresh.getToken())
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(7 * 24 * 3600)
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, newRefreshCookie.toString());
+
+        // 6. Response
+        return ResponseEntity.ok(
+                AuthResponseDto.builder()
+                        .success(true)
+                        .build()
+        );
+
     }
 
+
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+
+        // 1. Extract refresh token from Cookie
+        String refreshToken = null;
+        if (request.getCookies() != null) {
+            for (Cookie c : request.getCookies()) {
+                if (c.getName().equals("RefreshToken")) {
+                    refreshToken = c.getValue();
+                }
+            }
+        }
+
+        if (refreshToken != null) {
+            refreshTokenService.deleteByToken(refreshToken);
+        }
+
+        // 2. Remove Access Token cookie
+        Cookie jwtCookie = new Cookie("JwtToken", null);
+        jwtCookie.setPath("/");
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setMaxAge(0); // delete
+        response.addCookie(jwtCookie);
+
+        // 3. Remove Refresh Token cookie
+        Cookie rtCookie = new Cookie("RefreshToken", null);
+        rtCookie.setPath("/");
+        rtCookie.setHttpOnly(true);
+        rtCookie.setMaxAge(0); // delete
+        response.addCookie(rtCookie);
+
+        return ResponseEntity.ok("Logged out successfully");
+    }
+
+
+
+
+
+}

@@ -107,7 +107,8 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 protected boolean shouldNotFilter(HttpServletRequest request) {
     // ✅ Filter ALL paths EXCEPT login/signup
     return request.getServletPath().startsWith("/api/v1/auth/signin") ||
-            request.getServletPath().startsWith("/api/v1/auth/signup");
+            request.getServletPath().startsWith("/api/v1/auth/signup") ||
+            request.getServletPath().startsWith("/api/v1/auth/refresh");
 }
 
 

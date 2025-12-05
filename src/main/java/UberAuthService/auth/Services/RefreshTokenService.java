@@ -6,6 +6,7 @@ import UberAuthService.auth.Repositories.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.Optional;
@@ -20,6 +21,7 @@ public class RefreshTokenService {
     @Value("${jwt.refresh.expiry}")
     private int refreshExpiry;
 
+    @Transactional
     public RefreshToken createRefreshToken(Long userId){
         //Delete old refresh tokens for user (Optional but good)
         refreshTokenRepository.deleteByUserId(userId);
@@ -33,9 +35,15 @@ public class RefreshTokenService {
         return refreshTokenRepository.save(refresh);
     }
 
+    public Optional<RefreshToken> validateRefreshToken(String token) {
 
-    public Optional<RefreshToken> validateRefreshToken(String token){
+        return
+                refreshTokenRepository.findByToken(token)
+                        .filter(refreshToken -> refreshToken.getExpiryDate().after(new Date()));
+    }
 
-        return refreshTokenRepository.findByToken(token).filter(refreshToken -> refreshToken.getExpiryDate().after(new Date()));
+    @Transactional
+    public void deleteByToken(String token){
+        refreshTokenRepository.findByToken(token).ifPresent(refreshTokenRepository::delete);
     }
 }
