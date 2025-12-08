@@ -1,7 +1,8 @@
 package UberAuthService.auth.Adaptor;
 
 import UberAuthService.auth.DTO.PassengerSignUpDTO;
-import UberAuthService.auth.Model.Passenger;
+import com.example.SpringBootEntityService.models.Passenger;
+
 
 
 public interface ConvertPassengerSignUpDTOtoEntityAdaptor {

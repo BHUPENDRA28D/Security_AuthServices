@@ -1,6 +1,8 @@
 package UberAuthService.auth.Services;
 
-import UberAuthService.auth.Model.Passenger;
+//import UberAuthService.auth.Model.Passenger;
+import com.example.SpringBootEntityService.models.Passenger;
+
 import UberAuthService.auth.Repositories.PassengerRepository;
 import UberAuthService.auth.Helper.AuthPassengerDetails;
 import org.springframework.beans.factory.annotation.Autowired;

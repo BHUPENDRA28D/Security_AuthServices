@@ -1,7 +1,8 @@
 package UberAuthService.auth.Adaptor;
 
 import UberAuthService.auth.DTO.PassengerSignUpDTO;
-import UberAuthService.auth.Model.Passenger;
+import com.example.SpringBootEntityService.models.Passenger;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;

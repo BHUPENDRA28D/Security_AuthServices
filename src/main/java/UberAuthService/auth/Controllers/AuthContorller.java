@@ -4,8 +4,11 @@ import UberAuthService.auth.DTO.AuthRequestDTO;
 import UberAuthService.auth.DTO.AuthResponseDto;
 import UberAuthService.auth.DTO.PassengerResponseDTO;
 import UberAuthService.auth.DTO.PassengerSignUpDTO;
-import UberAuthService.auth.Model.Passenger;
-import UberAuthService.auth.Model.RefreshToken;
+//import UberAuthService.auth.Model.Passenger;
+//import UberAuthService.auth.Model.RefreshToken;
+import com.example.SpringBootEntityService.models.Passenger;
+import com.example.SpringBootEntityService.models.RefreshToken;
+
 import UberAuthService.auth.Repositories.PassengerRepository;
 import UberAuthService.auth.Services.AuthService;
 import UberAuthService.auth.Services.JWTService;
@@ -185,7 +188,7 @@ public class AuthContorller {
                     .body("Refresh Token missing");
         }
 
-//     2. Validate refresh token (not expired & present in DB
+//     2. Validate refresh token (not expired & present in DB)
 
         Optional<RefreshToken> optional = refreshTokenService.validateRefreshToken(refreshValue);
         if(optional.isEmpty()){
@@ -212,6 +215,7 @@ public class AuthContorller {
                 .build();
 
         response.setHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+
         // 5. (Optional but recommended) Rotate refresh token → new token, delete old
         RefreshToken newRefresh = refreshTokenService.createRefreshToken(stored.getUserId());
         refreshTokenService.deleteByToken(refreshValue);
@@ -271,6 +275,24 @@ public class AuthContorller {
     }
 
 
+/*
+    // ---------------------------------------------------------
+    // DELETE USER
+    // ---------------------------------------------------------
+    @DeleteMapping("/delete-user/{userId}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
+
+        if (passengerRepository.existsById(userId)) {
+
+            refreshTokenService.deleteByUserId(userId);
+            passengerRepository.deleteById(userId);
+
+            return ResponseEntity.ok("User deleted");
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("User not found");
+    }*/
 
 
 

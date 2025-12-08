@@ -1,6 +1,6 @@
 package UberAuthService.auth.Repositories;
 
-import UberAuthService.auth.Model.RefreshToken;
+import com.example.SpringBootEntityService.models.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

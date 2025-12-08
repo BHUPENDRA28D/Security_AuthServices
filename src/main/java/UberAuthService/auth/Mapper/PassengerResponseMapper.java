@@ -2,7 +2,7 @@ package UberAuthService.auth.Mapper;
 
 import UberAuthService.auth.Adaptor.ConvertPassengerSignUpDTOtoEntityAdaptor;
 import UberAuthService.auth.DTO.PassengerResponseDTO;
-import UberAuthService.auth.Model.Passenger;
+import com.example.SpringBootEntityService.models.Passenger;
 import UberAuthService.auth.Repositories.PassengerRepository;
 import org.springframework.stereotype.Component;
 

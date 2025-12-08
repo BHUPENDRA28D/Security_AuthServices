@@ -1,7 +1,8 @@
 package UberAuthService.auth.Services;
 
 
-import UberAuthService.auth.Model.RefreshToken;
+//import UberAuthService.auth.Model.RefreshToken;
+import com.example.SpringBootEntityService.models.RefreshToken;
 import UberAuthService.auth.Repositories.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,7 +44,10 @@ public class RefreshTokenService {
     }
 
     @Transactional
-    public void deleteByToken(String token){
+    public void deleteByToken(String token) {
         refreshTokenRepository.findByToken(token).ifPresent(refreshTokenRepository::delete);
+
     }
+
+
 }

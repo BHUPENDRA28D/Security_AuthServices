@@ -4,8 +4,9 @@ import UberAuthService.auth.Adaptor.ConvertPassengerSignUpDTOtoEntityAdaptor;
 import UberAuthService.auth.DTO.PassengerResponseDTO;
 import UberAuthService.auth.DTO.PassengerSignUpDTO;
 import UberAuthService.auth.Mapper.PassengerResponseMapper;
-import UberAuthService.auth.Model.Passenger;
+import com.example.SpringBootEntityService.models.Passenger;
 import UberAuthService.auth.Repositories.PassengerRepository;
+import com.example.SpringBootEntityService.models.Passenger;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,7 +35,7 @@ public class AuthServiceImpl implements AuthService{
     public PassengerResponseDTO signUpPassenger(PassengerSignUpDTO passengerSignUpDTO) {
 
         //convert DTO ---> ENTITY
-         Passenger passenger=  adaptor.convertDTOtoEntity(passengerSignUpDTO);
+        Passenger passenger=  adaptor.convertDTOtoEntity(passengerSignUpDTO);
         //save to db
         Passenger saved = passengerRepository.save(passenger);
 
