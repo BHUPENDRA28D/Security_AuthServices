@@ -44,7 +44,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 
-	implementation 'com.example:SpringBootEntityService:0.0.1-SNAPSHOT'
+	implementation 'com.example:SpringBootEntityService:0.0.4-SNAPSHOT'
 
 
 
